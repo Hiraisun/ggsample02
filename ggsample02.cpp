@@ -124,16 +124,17 @@ static GLuint createProgram(const char* vsrc, const char* pv, const char* fsrc, 
   return 0;
 }
 
+
 //
-// 頂点配列オブジェクトの作成
+// 頂点配列オブジェクトの作成     // 三次元に拡張
 //
 //   vertices: 頂点数
-//   position: 頂点の二次元位置 (GLfloat[2] の配列)
+//   position: 頂点の三次元位置 (GLfloat[3] の配列)
 //   lines: 線分数
 //   index: 線分の頂点インデックス
 //   戻り値: 作成された頂点配列オブジェクト名
 //
-static GLuint createObject(GLuint vertices, const GLfloat(*position)[2], GLuint lines, const GLuint* index)
+static GLuint createObject(GLuint vertices, const GLfloat(*position)[3], GLuint lines, const GLuint* index)
 {
   // 頂点配列オブジェクト
   GLuint vao;
@@ -144,7 +145,7 @@ static GLuint createObject(GLuint vertices, const GLfloat(*position)[2], GLuint 
   GLuint vbo;
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[2]) * vertices, position, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[3]) * vertices, position, GL_STATIC_DRAW);
 
   // インデックスバッファオブジェクト
   GLuint ibo;
@@ -153,7 +154,7 @@ static GLuint createObject(GLuint vertices, const GLfloat(*position)[2], GLuint 
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * lines, index, GL_STATIC_DRAW);
 
   // 結合されている頂点バッファオブジェクトを in 変数から参照できるようにする
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
   glEnableVertexAttribArray(0);
 
   // 頂点配列オブジェクトの結合を解除した後に頂点バッファオブジェクトとインデックスバッファオブジェクトの結合を解除する
@@ -201,12 +202,16 @@ int GgApp::main(int argc, const char* const* argv)
   const auto program{ createProgram(vsrc, "pv", fsrc, "fc") };
 
   // 頂点属性
-  static const GLfloat position[][2]
+  static const GLfloat position[][3]
   {
-    { -0.5f, -0.5f },
-    {  0.5f, -0.5f },
-    {  0.5f,  0.5f },
-    { -0.5f,  0.5f }
+    { -0.9f, -0.9f,  0.9f }, // 0
+    {  0.9f, -0.9f,  0.9f }, // 1
+    {  0.9f,  0.9f,  0.9f }, // 2
+    { -0.9f,  0.9f,  0.9f }, // 3
+    { -0.9f, -0.9f, -0.9f }, // 4
+    {  0.9f, -0.9f, -0.9f }, // 5
+    {  0.9f,  0.9f, -0.9f }, // 6
+    { -0.9f,  0.9f, -0.9f }  // 7
   };
 
   // 頂点数
@@ -215,7 +220,9 @@ int GgApp::main(int argc, const char* const* argv)
   // 頂点インデックス
   static const GLuint index[]
   {
-    0, 2, 1, 3
+    0,1, 1,2, 2,3, 3,0, //前面
+    4,5, 5,6, 6,7, 7,4, //後面
+    0,4, 1,5, 2,6, 3,7, // Z軸
   };
 
   // 稜線数
